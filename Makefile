@@ -3,7 +3,7 @@ PROJ_NAME := integer_pid
 OPT_RELEASE := -Os -g0
 OPT_DEBUG   := -O0 -g3
 
-OPT := $(OPT_RELEASE)
+OPT := $(OPT_DEBUG)
 CPP_FLAGS := -std=c++11\
              -Wall -Wextra -Wpedantic -pedantic-errors -Wduplicated-branches \
              -Wduplicated-cond -Wfloat-equal -Wshadow=compatible-local \
@@ -32,7 +32,7 @@ PROJ_PATHS := $(addprefix -I, $(PROJ_DIRS))
 LDFLAGS := -fdata-sections -ffunction-sections -Wl,--gc-sections \
            -Wl,-Map=${BUILD_DIR}/${PROJ_NAME}.map 
 
-$(BUILD_DIR)/obj/%.o: %.cpp
+$(BUILD_DIR)/obj/%.o: %.cpp Makefile
 	@echo [CPP] $<
 	@mkdir -p ${BUILD_DIR}
 	@mkdir -p $(dir $@)
