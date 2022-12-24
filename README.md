@@ -1,6 +1,6 @@
 # integer_pid - С++ template-based integer PID regilator
 
-Released under MIT Licence
+Released under [MIT License](LICENSE)
 
 ## Implemended functionality:
 - P
