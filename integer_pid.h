@@ -21,7 +21,12 @@ public:
         out_1b += differentiate_1b(input, in_previous, delta_t, settings);
         in_previous = input;
 
-        return out_1b >> 8;
+        int32_t max_1b = static_cast<int32_t>(settings.out_max) << 8;
+        out_1b         = out_1b > max_1b ? max_1b : out_1b;
+
+        int32_t min_1b = static_cast<int32_t>(settings.out_min) << 8;
+        out_1b         = out_1b < min_1b ? min_1b : out_1b;
+        return static_cast<int16_t>(out_1b >> 8);
     }
 
 private:

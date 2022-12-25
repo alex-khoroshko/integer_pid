@@ -12,8 +12,7 @@ float differentiate(float in, float in_prev, float kd, float dt) {
     return (in - in_prev) * kd / dt;
 }
 
-char const* groups[] = {"Integrator", "Differentiator", "Global", "Finale",
-                        "LeakTest"};
+char const* groups[] = {"Integrator", "Differentiator", "Full_iterate"};
 
 DEFINE_TEST_G(precision, Integrator) {
     // all coefficients for precision test must be >1, otherwise rounding error
@@ -184,6 +183,49 @@ DEFINE_TEST_G(overflow, Differentiator) {
     TEST(ok == true);
 }
 
+DEFINE_TEST_G(kp_and_limit, Full_iterate) {
+    // all coefficients for precision test must be >1, otherwise rounding error
+    // would spoil the result
+    float kp = 1.24f;
+
+    settings_t cfg = {
+        float_to_coeff(kp),  // k_p
+        0,                   // k_i
+        30000,               // i_max
+        -30000,              // i_min
+        0,                   // k_d
+        0x7ffe,              // out_max
+        -0x7ffd              // out_min
+    };
+    integer_pid::Pid pid(cfg);
+
+    // value that just fits into limit
+    int16_t in_at_limit = static_cast<int32_t>(cfg.out_max) * 0x100 / cfg.k_p;
+
+    // test for value closest to limit
+    int16_t in            = in_at_limit - 1;
+    int16_t out           = pid.iterate(in, 0xFF);
+    int16_t out_reference = in * cfg.k_p / 0x100;
+    TEST(out != cfg.out_max);
+    bool ok = std::abs(out - out_reference) < 2;
+    TEST(ok);
+    // repeat for negative
+    in            = -in;
+    out           = pid.iterate(in, 0xFF);
+    out_reference = in * cfg.k_p / 0x100;
+    TEST(out != cfg.out_min);
+    ok = std::abs(out - out_reference) < 2;
+    TEST(ok);
+
+    // max_limit
+    in  = in_at_limit + 1;
+    out = pid.iterate(in, 0xFF);
+    TEST(out == cfg.out_max);
+    // repeat for negative
+    in  = -in;
+    out = pid.iterate(in, 0xFF);
+    TEST(out == cfg.out_min);
+}
 
 int main() {
     bool pass = true;
