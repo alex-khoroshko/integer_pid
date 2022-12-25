@@ -63,5 +63,18 @@ inline void update_integrator(int16_t in, int32_t& integrator_2b,
     }
 }
 
+inline int32_t differentiate_1b(int16_t in, int16_t in_prev, uint16_t delta_t,
+                                const settings_t& settings) {
+    // difference can overflow, so start from extended in
+    int32_t delta_in = static_cast<int32_t>(in) - in_prev;
+    // if delta_t = 0x100, then normalizer is 0x100. Normalizer adds 1b when
+    // multiplied
+    uint16_t t_normalizer  = static_cast<uint16_t>(0xFFFF) / delta_t;
+    int32_t  d_in          = (delta_in * t_normalizer) >> 8;
+    d_in                   = constrain(d_in);
+    int32_t d_component_1b = d_in * settings.k_d;
+    return d_component_1b;
+}
+
 
 }  // namespace integer_pid

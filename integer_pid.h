@@ -17,6 +17,13 @@ public:
         int32_t out_1b = in_ext * settings.k_p;
 
         //--- integral part
+        update_integrator(input, integrator_2b, delta_t, settings);
+        out_1b += integrator_2b >> 8;
+
+        out_1b += differentiate_1b(input, in_previous, delta_t, settings);
+        in_previous = input;
+
+        return out_1b >> 8;
     }
 
 private:
