@@ -44,7 +44,7 @@ int32_t constrain(int64_t val) {
 }
 
 /**
- * in==0xFF (one), time == 0xFF (one), ki=0xFF(one) => out = 0xFF (one)
+ * in==0xFF, time == 0xFF (one), ki=0xFF(one) => out = 0xFF
  */
 inline void update_integrator(int16_t in, int32_t& integrator_2b,
                               int16_t delta_t, const settings_t& settings) {
