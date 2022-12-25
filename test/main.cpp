@@ -91,6 +91,44 @@ DEFINE_TEST_G(precision, Differentiator) {
 }
 
 
+DEFINE_TEST_G(overflow, Differentiator) {
+    settings_t cfg = {
+        30,      // k_p
+        100,     // k_i
+        30000,   // i_max
+        -30000,  // i_min
+        0x7FFF,  // k_d
+        1000,    // out_max
+        -1000    // out_min
+    };
+    int16_t dt_int  = 0x1;
+    int16_t in      = 0x7FFF;
+    int16_t in_prev = -0x8000;
+
+    // with dt == 0x1 - should return 0
+    int32_t diff_int_1b = differentiate_1b(in, in_prev, dt_int, cfg);
+    TEST(diff_int_1b == false);
+
+    dt_int = 0x2;  // min allowed value
+
+    // white box testing: value inside differentiation is limited to 0xFFFF and
+    // then multiplied by k_d
+    int32_t reference_val = 0x7FFF * cfg.k_d;
+
+    diff_int_1b = differentiate_1b(in, in_prev, dt_int, cfg);
+    bool ok     = std::abs(diff_int_1b - reference_val) < 0x2;
+    TEST(ok == true);
+
+    //--- repeat with different sign
+    in            = -0x8000;
+    in_prev       = 0x7FFF;
+    diff_int_1b   = differentiate_1b(in, in_prev, dt_int, cfg);
+    reference_val = -0x8000 * cfg.k_d;
+    ok            = std::abs(diff_int_1b - reference_val) < 0x2;
+    TEST(ok == true);
+}
+
+
 int main() {
     bool pass = true;
 

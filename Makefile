@@ -24,7 +24,7 @@ test: CPP_FILES += $(shell find -maxdepth 10 -type f -path test -path simpletest
 
 O_CPP_FILES := $(addprefix $(BUILD_DIR)/obj/, $(CPP_FILES))
 O_FILES := $(patsubst %.cpp, %.o, $(O_CPP_FILES))
-DEP_FILES := $(shell find -maxdepth 10 -type f -name "*.d" -path "build")
+DEP_FILES := $(shell find -maxdepth 10 -type f -path "./build/*" -name "*.d")
 
 PROJ_DIRS  := $(shell find -maxdepth 100 -type d -name "*")
 PROJ_PATHS := $(addprefix -I, $(PROJ_DIRS))
@@ -32,7 +32,7 @@ PROJ_PATHS := $(addprefix -I, $(PROJ_DIRS))
 LDFLAGS := -fdata-sections -ffunction-sections -Wl,--gc-sections \
            -Wl,-Map=${BUILD_DIR}/${PROJ_NAME}.map 
 
-$(BUILD_DIR)/obj/%.o: %.cpp Makefile
+$(BUILD_DIR)/obj/%.o: %.cpp Makefile 
 	@echo [CPP] $<
 	@mkdir -p ${BUILD_DIR}
 	@mkdir -p $(dir $@)
@@ -61,8 +61,7 @@ $(BUILD_DIR)/test.elf: $(O_FILES)
 	@echo 'Completed: $@'	
 	
 test: $(BUILD_DIR)/test.elf
-	@$(SZ) $< 
+	@$(SZ) $< 	
 	
-	
-	
+include $(DEP_FILES)
 	

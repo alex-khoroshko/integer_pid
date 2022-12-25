@@ -8,9 +8,7 @@ class Pid {
 public:
     Pid(const settings_t& cfg) : settings(cfg) {}
 
-    /**
-     * in==0xFF (one), time == 0xFF (one), ki=0xFF(one) => out = 0xFF (one)
-     */
+
     int16_t iterate(int16_t input, int16_t delta_t) {
         //--- proportional part
         int32_t in_ext = input;
