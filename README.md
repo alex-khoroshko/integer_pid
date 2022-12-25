@@ -2,6 +2,10 @@
 
 С++ integer PID regilator. Takes 16-bit input and calculates 16-bit output.
 
+Developed specifically for embedded systems where execution time is critical. 
+
+Compiles both for Linux systems (for unit test and application tests/simulation) and for any embedded system. Every variable has defined size, so code should be architecture-independent (should work for 8-bit AVR, 32-bit Cortex-M series etc).
+
 Has automatic tests for everything.
 
 Released under [MIT License](LICENSE).
@@ -13,26 +17,28 @@ Released under [MIT License](LICENSE).
 - D
 - Out_max, Out_min
 
-## How to compile
+## How to use
+
+Include this repository as submodule into your project. Write code with it and build it (see below). Leave any feedback you have as issues.
+
+### How to write code with it
+
+1. `#include "integer_pid.h"`
+1. Fill `settings_t` with proper values. 
+1. Create object of type `Pid`. Pass settings into constructor.
+1. Call function `iterate` as needed.
 
 ### Ordinary build
 
-Pid regulator is defined in header using inline functions - no separate compilation of pid is needed - it would be a part of user files.
+Pid regulator is defined in header using inline functions - no separate compilation is needed, it would compile as a part of user files.
 
-**Memory consumption note**: In my experience, optimizer correctly creates only one instance of code, thus memory consumption for embedded systems is the same as for normal code placement into cpp files. If you experience excessive memory consumption - please let me know.
+**Memory consumption note**: In my experience, optimizer correctly creates only one instance of code, thus memory consumption in embedded systems is the same as for normal code placement into cpp files. If you experience excessive memory consumption - please let me know.
 
 ### Test build
 
 Compile test: `make test`
 
 Run test: `build/test.elf`
-
-## How to use
-
-1. `#include "integer_pid.h"`
-1. Fill `settings_t` with proper values. 
-1. Create object of type `Pid`. Pass settings into constructor.
-1. Call function `iterate` as needed.
 
 ### Meaning of coefficients and time
 
