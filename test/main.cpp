@@ -41,7 +41,7 @@ DEFINE_TEST_G(precision, Integrator) {
     }
     float test_val = coeff_to_float(integrator_int >> 16);
 
-    // precision must fit into one bit of signed value
+    // error must fit into one bit of signed value
     bool ok = std::abs(test_val - integrator) < test_val / 127;
     TEST(ok == true);
 
@@ -54,9 +54,65 @@ DEFINE_TEST_G(precision, Integrator) {
     }
     test_val = coeff_to_float(integrator_int >> 16);
 
-    // precision must fit into one bit of signed value
+    // error must fit into one bit of signed value
     ok = std::abs(test_val - integrator) < test_val / 127;
     TEST(ok == true);
+}
+
+DEFINE_TEST_G(imax_imin, Integrator) {
+    // set imax imin to max values minus one to be sure, that they work (not
+    // limiting with maximum int16_t value)
+    constexpr int16_t max_val = 0x7ffe;
+    settings_t        cfg     = {
+        30,        // k_p
+        0x100,     // k_i
+        max_val,   // i_max
+        -max_val,  // i_min
+        100,       // k_d
+        1000,      // out_max
+        -1000      // out_min
+    };
+
+    float   integrator           = 0.f;
+    int32_t integrator_int       = 0;
+    int16_t in                   = 0x234;
+    float   dt_for_10_iterations = max_val / (in * 10.1f);
+
+    for (int i = 0; i < 10; i++) {
+        update_integrator(in, integrator_int,
+                          float_to_coeff(dt_for_10_iterations), cfg);
+        integrator     = integrate(in, 1.f, integrator, dt_for_10_iterations);
+        float test_val = integrator_int >> 16;
+
+        // error must fit into one bit of signed value
+        float margin = std::abs(test_val / 127);
+        bool  ok     = std::abs(test_val - integrator) < margin;
+        TEST(ok == true);
+    }
+    update_integrator(in, integrator_int, float_to_coeff(dt_for_10_iterations),
+                      cfg);
+    int16_t val = integrator_int >> 16;
+    TEST(val == cfg.i_max);
+
+    // repeat for negative value
+    in             = -0x234;
+    integrator_int = 0;
+    integrator     = 0.f;
+    for (int i = 0; i < 10; i++) {
+        update_integrator(in, integrator_int,
+                          float_to_coeff(dt_for_10_iterations), cfg);
+        integrator     = integrate(in, 1.f, integrator, dt_for_10_iterations);
+        float test_val = integrator_int >> 16;
+
+        // error must fit into one bit of signed value
+        float margin = std::abs(test_val / 127);
+        bool  ok     = std::abs(test_val - integrator) < margin;
+        TEST(ok == true);
+    }
+    update_integrator(in, integrator_int, float_to_coeff(dt_for_10_iterations),
+                      cfg);
+    val = integrator_int >> 16;
+    TEST(val == cfg.i_min);
 }
 
 DEFINE_TEST_G(precision, Differentiator) {
@@ -76,17 +132,17 @@ DEFINE_TEST_G(precision, Differentiator) {
     float    dt     = 1.3f;
     uint16_t dt_int = float_to_coeff(dt);
 
-    float in      = 2.13f;
-    float in_prev = 1.29f;
+    int16_t in      = 0x1555;
+    int16_t in_prev = 0x3f7a;
 
     float reference_val = differentiate(in, in_prev, kd, dt);
 
-    int32_t diff_int_1b = differentiate_1b(
-        float_to_coeff(in), float_to_coeff(in_prev), dt_int, cfg);
-    float test_val = static_cast<float>(diff_int_1b) / 0x10000;
+    int32_t diff_int_1b = differentiate_1b(in, in_prev, dt_int, cfg);
+    float   test_val    = static_cast<float>(diff_int_1b) / 0x100;
 
     // precision must fit into one bit of signed value
-    bool ok = std::abs(test_val - reference_val) < test_val / 127;
+    float margin = std::abs(test_val / 127);
+    bool  ok     = std::abs(test_val - reference_val) < margin;
     TEST(ok == true);
 }
 

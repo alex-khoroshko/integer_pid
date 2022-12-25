@@ -58,9 +58,9 @@ inline void update_integrator(int16_t in, int32_t& integrator_2b,
     int64_t i_min_2b = static_cast<int32_t>(i_min) << 16;
 
     if (i_next_val >= i_max_2b) {
-        integrator_2b = i_max;
+        integrator_2b = i_max_2b;
     } else if (i_next_val <= i_min_2b) {
-        integrator_2b = i_min;
+        integrator_2b = i_min_2b;
     } else {
         integrator_2b = i_next_val;
     }
